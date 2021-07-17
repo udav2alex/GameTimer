@@ -37,12 +37,12 @@
         android:text="@string/timer_00_00_00"
         android:textSize="@dimen/timer_text_size_32sp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/timer_control_button"
+        app:layout_constraintEnd_toStartOf="@id/timer_toggle_button"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <Button
-        android:id="@+id/timer_control_button"
+        android:id="@+id/timer_toggle_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="@dimen/gap_half_8dp"

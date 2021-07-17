@@ -6,19 +6,15 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.viewbinding.ViewBinding
 
-abstract class BaseFragment<B : ViewBinding>(test: Int) : Fragment() {
+abstract class BaseFragment<B : ViewBinding> : Fragment() {
     private var _binding: B? = null
-    private val binding get() = _binding!!
-
-    var test2: Int
-
-    init {
-        test2 = test
-    }
+    protected val binding get() = _binding!!
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
-    ) = getBinding(inflater, container).root
+    ) = getBinding(inflater, container)
+        .also { _binding = it }
+        .root
 
     abstract fun getBinding(inflater: LayoutInflater, container: ViewGroup?): B
 
