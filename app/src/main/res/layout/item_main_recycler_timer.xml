@@ -8,11 +8,11 @@
         android:id="@+id/blinker_image_view"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="@dimen/gap_standard_16dp"
+        android:layout_margin="@dimen/gap_standard_16dp"
         android:contentDescription="@string/blinking_point"
         android:src="@drawable/blinker"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/timer_text_view"
         app:layout_constraintTop_toTopOf="parent"
         app:tint="?attr/colorPrimary" />
 
@@ -38,7 +38,7 @@
         android:textSize="@dimen/timer_text_size_32sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@id/timer_control_button"
-        app:layout_constraintStart_toEndOf="@id/blinker_image_view"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <Button
