@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="gap_half_8dp">8dp</dimen>
+    <dimen name="timer_text_size_32sp">32sp</dimen>
+    <dimen name="gap_standard_16dp">16dp</dimen>
+    <dimen name="buttons_text_size">18sp</dimen>
+</resources>

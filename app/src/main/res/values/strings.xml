@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">Game Timer</string>
+    <string name="blinking_point">Blinking point</string>
+    <string name="delete_timer">Delete timer</string>
+    <string name="timer_00_00_00">00:00:00</string>
+    <string name="start">START</string>
+</resources>
