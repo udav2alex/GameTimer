@@ -6,6 +6,8 @@ import java.text.DecimalFormat
 
 object DF: DecimalFormat("00")
 
+fun TimerState.toBase() = BaseTimer(id)
+
 fun BaseTimer.toState(): TimerState = TimerState(id, name, this.secondsToString(), running)
 
 fun BaseTimer.secondsToString() = StringBuilder().also {

@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import ru.gressor.gametimer.entities.BaseTimer
 import ru.gressor.gametimer.interactor.MainInteractor
+import ru.gressor.gametimer.mapping.toBase
 import ru.gressor.gametimer.mapping.toState
 import ru.gressor.gametimer.states.TimerState
 
@@ -30,6 +31,6 @@ class MainVModel(
     }
 
     fun delete(timerState: TimerState) {
-
+        interactor.deleteTimer(timerState.toBase())
     }
 }

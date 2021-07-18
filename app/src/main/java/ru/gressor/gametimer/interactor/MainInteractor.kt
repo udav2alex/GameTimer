@@ -2,12 +2,11 @@ package ru.gressor.gametimer.interactor
 
 import kotlinx.coroutines.flow.*
 import ru.gressor.gametimer.entities.BaseTimer
-import ru.gressor.gametimer.repository.TimersRepository
 import java.text.SimpleDateFormat
 import java.util.*
 
 class MainInteractor(
-    private val timersRepository: TimersRepository
+    private val timersRepository: ITimersRepository
 ) {
     private val _updateListFlow = MutableStateFlow(0L)
     val updateListFlow: StateFlow<Long> = _updateListFlow.asStateFlow()
@@ -27,6 +26,11 @@ class MainInteractor(
                 secondsValue
             )
         )
+        updateTimersList()
+    }
+
+    fun deleteTimer(timer: BaseTimer) {
+        timersRepository.deleteTimer(timer)
         updateTimersList()
     }
 

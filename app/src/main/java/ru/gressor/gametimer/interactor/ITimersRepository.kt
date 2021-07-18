@@ -1,8 +1,9 @@
-package ru.gressor.gametimer.repository
+package ru.gressor.gametimer.interactor
 
 import ru.gressor.gametimer.entities.BaseTimer
 
-interface TimersRepository {
+interface ITimersRepository {
     fun storeTimer(timer: BaseTimer)
+    fun deleteTimer(timer: BaseTimer)
     fun getAllTimers(): List<BaseTimer>
 }
