@@ -1,7 +1,9 @@
-package ru.gressor.gametimer.states
+package ru.gressor.gametimer.ui
 
-data class TimerState(
-    val id: Long = 0,
+import java.util.*
+
+data class StatedTimer(
+    val id: UUID,
     var name: String = "",
     var time: String = "00:00:00",
     var running: Boolean = false

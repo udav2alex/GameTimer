@@ -12,7 +12,6 @@ import kotlinx.coroutines.flow.collect
 import ru.gressor.gametimer.databinding.FragmentMainBinding
 import ru.gressor.gametimer.interactor.MainInteractor
 import ru.gressor.gametimer.repository.TimersRepositoryList
-import ru.gressor.gametimer.states.TimerState
 import ru.gressor.gametimer.vm.MainVModel
 import ru.gressor.gametimer.vm.MainVModelFactory
 
@@ -48,12 +47,12 @@ class MainFragment : BaseFragment<FragmentMainBinding>(), MainRecyclerAdapter.Co
         }
     }
 
-    override fun toggleClick(timerState: TimerState) {
-        vModel.toggle(timerState)
+    override fun toggleClick(timer: StatedTimer) {
+        vModel.toggle(timer)
     }
 
-    override fun deleteClick(timerState: TimerState) {
-        vModel.delete(timerState)
+    override fun deleteClick(timer: StatedTimer) {
+        vModel.delete(timer)
     }
 
     override fun getBinding(inflater: LayoutInflater, container: ViewGroup?) =

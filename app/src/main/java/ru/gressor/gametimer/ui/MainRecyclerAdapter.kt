@@ -5,15 +5,14 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.coroutines.flow.StateFlow
 import ru.gressor.gametimer.databinding.ItemMainRecyclerTimerBinding
-import ru.gressor.gametimer.states.TimerState
 
 class MainRecyclerAdapter(
     private val controlListener: ControlClickListener
 ) : RecyclerView.Adapter<MainRecyclerAdapter.TimerViewHolder>() {
 
-    private val itemsList = mutableListOf<StateFlow<TimerState>>()
+    private val itemsList = mutableListOf<StateFlow<StatedTimer>>()
 
-    fun populate(timersFlows: List<StateFlow<TimerState>>) {
+    fun populate(timersFlows: List<StateFlow<StatedTimer>>) {
         itemsList.clear()
         itemsList.addAll(timersFlows)
         notifyDataSetChanged()
@@ -35,7 +34,7 @@ class MainRecyclerAdapter(
     inner class TimerViewHolder(private val binding: ItemMainRecyclerTimerBinding) :
         RecyclerView.ViewHolder(binding.root) {
 
-        fun bind(state: StateFlow<TimerState>) {
+        fun bind(state: StateFlow<StatedTimer>) {
             with(binding) {
                 deleteButton.setOnClickListener {
                     controlListener.deleteClick(state.value)
@@ -49,7 +48,7 @@ class MainRecyclerAdapter(
     }
 
     interface ControlClickListener {
-        fun toggleClick(timerState: TimerState)
-        fun deleteClick(timerState: TimerState)
+        fun toggleClick(timer: StatedTimer)
+        fun deleteClick(timer: StatedTimer)
     }
 }

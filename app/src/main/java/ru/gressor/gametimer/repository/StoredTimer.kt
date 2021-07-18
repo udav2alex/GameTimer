@@ -1,13 +1,15 @@
-package ru.gressor.gametimer.entities
+package ru.gressor.gametimer.repository
 
-data class BaseTimer(
-    val id: Long = 0,
+import java.util.*
+
+data class StoredTimer(
+    val id: UUID,
     var name: String = "",
     var seconds: Int = 0,
     var running: Boolean = false
 ) {
     override fun equals(other: Any?) =
-        if (other == null || other !is BaseTimer) {
+        if (other == null || other !is StoredTimer) {
             false
         } else id == other.id
 
@@ -16,6 +18,6 @@ data class BaseTimer(
     }
 
     companion object {
-        val empty = BaseTimer(-1, "", 0, false)
+        val empty = StoredTimer(UUID.randomUUID(), "", 0, false)
     }
 }

@@ -1,17 +1,31 @@
 package ru.gressor.gametimer.mapping
 
-import ru.gressor.gametimer.entities.BaseTimer
-import ru.gressor.gametimer.states.TimerState
+import ru.gressor.gametimer.interactor.ActiveTimer
+import ru.gressor.gametimer.interactor.Ticker
+import ru.gressor.gametimer.repository.StoredTimer
+import ru.gressor.gametimer.ui.StatedTimer
 import java.text.DecimalFormat
 
-object DF: DecimalFormat("00")
+object DF : DecimalFormat("00")
 
-fun TimerState.toBase() = BaseTimer(id)
 
-fun BaseTimer.toState(): TimerState = TimerState(id, name, this.secondsToString(), running)
 
-fun BaseTimer.secondsToString() = StringBuilder().also {
-    var seconds = (this.seconds)
+fun StatedTimer.toStored() = StoredTimer(id)
+
+fun StoredTimer.toStated(): StatedTimer = StatedTimer(id, name, seconds.secondsToString(), running)
+
+
+
+fun StatedTimer.toActive() = ActiveTimer(id, name, Ticker(0))
+
+fun ActiveTimer.toStated() = StatedTimer(id, name, ticker.flow.value.secondsToString(), ticker.isRunning())
+
+fun ActiveTimer.toStored() = StoredTimer(id, name, ticker.flow.value, ticker.isRunning())
+
+fun StoredTimer.toActive() = ActiveTimer(id, name, Ticker(seconds))
+
+fun Int.secondsToString() = StringBuilder().also {
+    var seconds = (this)
     val days = seconds / 3600 / 24
     if (days > 0) it.append("$days:")
 

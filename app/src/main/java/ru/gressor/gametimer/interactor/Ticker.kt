@@ -5,14 +5,14 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
 class Ticker(
-    startValue: Long,
-    private val finishValue: Long = 0L,
+    startValue: Int,
+    private val finishValue: Int = 0,
     private var isRunning: Boolean = false,
     private val pauseMillis: Long = 1000L
 ) {
     private var job: Job? = null
 
-    private val _flow: MutableStateFlow<Long> = MutableStateFlow(startValue)
+    private val _flow: MutableStateFlow<Int> = MutableStateFlow(startValue)
     private var _finished = false
 
     val flow = _flow.asStateFlow()
@@ -24,6 +24,8 @@ class Ticker(
             if (_flow.value != value) _flow.value = value
             field = value
         }
+
+    fun isRunning() = isRunning
 
     fun start() {
         isRunning = true
@@ -46,7 +48,7 @@ class Ticker(
         }
     }
 
-    private fun getValueThenNext(): Long {
+    private fun getValueThenNext(): Int {
         return value.also { value++ }
     }
 }

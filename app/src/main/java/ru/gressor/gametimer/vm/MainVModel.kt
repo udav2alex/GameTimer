@@ -6,31 +6,43 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
-import ru.gressor.gametimer.entities.BaseTimer
+import ru.gressor.gametimer.interactor.ActiveTimer
 import ru.gressor.gametimer.interactor.MainInteractor
-import ru.gressor.gametimer.mapping.toBase
-import ru.gressor.gametimer.mapping.toState
-import ru.gressor.gametimer.states.TimerState
+import ru.gressor.gametimer.interactor.Ticker
+import ru.gressor.gametimer.mapping.toActive
+import ru.gressor.gametimer.mapping.toStated
+import ru.gressor.gametimer.repository.StoredTimer
+import ru.gressor.gametimer.ui.StatedTimer
+import java.text.SimpleDateFormat
+import java.util.*
 
 class MainVModel(
     private val interactor: MainInteractor
 ) : ViewModel() {
-    val timersStates: List<StateFlow<TimerState>> get() =
-        interactor.timersList.map { flow ->
-            flow.map { it.toState() }
-                .stateIn(viewModelScope, SharingStarted.Eagerly, BaseTimer.empty.toState())
-        }
+    val timersStates: List<StateFlow<StatedTimer>>
+        get() =
+            interactor.timersList.map { flow ->
+                flow.map { it.toStated() }
+                    .stateIn(viewModelScope, SharingStarted.Eagerly, StoredTimer.empty.toStated())
+            }
     val updateFlow: StateFlow<Long> = interactor.updateListFlow
 
     fun newTimer(time: String) {
-        interactor.storeTimer(time.toInt() * 60)
+        val df = SimpleDateFormat("yyyy-MM-DD HH:mm:ss", Locale.getDefault())
+        interactor.storeTimer(
+            ActiveTimer(
+                UUID.randomUUID(),
+                df.format(Date()),
+                Ticker(time.toInt() * 60)
+            )
+        )
     }
 
-    fun toggle(timerState: TimerState) {
+    fun toggle(timer: StatedTimer) {
 
     }
 
-    fun delete(timerState: TimerState) {
-        interactor.deleteTimer(timerState.toBase())
+    fun delete(timer: StatedTimer) {
+        interactor.deleteTimer(timer.toActive())
     }
 }
