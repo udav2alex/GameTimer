@@ -9,6 +9,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import ru.gressor.gametimer.databinding.FragmentMainBinding
+import ru.gressor.gametimer.interactor.ActiveTimer
 import ru.gressor.gametimer.interactor.MainInteractor
 import ru.gressor.gametimer.repository.TimersRepositoryList
 import ru.gressor.gametimer.vm.MainVModel
@@ -35,7 +36,7 @@ class MainFragment : BaseFragment<FragmentMainBinding>(), MainRecyclerAdapter.Co
                 vModel.updateListStatusFlow
                     .flowWithLifecycle(lifecycle, Lifecycle.State.STARTED)
                     .collect {
-                        adapter.populate(vModel.statedTimers)
+                        adapter.populate(vModel.timersList)
                     }
             }
 
@@ -45,11 +46,11 @@ class MainFragment : BaseFragment<FragmentMainBinding>(), MainRecyclerAdapter.Co
         }
     }
 
-    override fun toggleClick(timer: StatedTimer) {
+    override fun toggleClick(timer: ActiveTimer) {
         vModel.toggle(timer)
     }
 
-    override fun deleteClick(timer: StatedTimer) {
+    override fun deleteClick(timer: ActiveTimer) {
         vModel.delete(timer)
     }
 

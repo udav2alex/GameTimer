@@ -7,23 +7,22 @@ import kotlinx.coroutines.flow.stateIn
 import ru.gressor.gametimer.interactor.ActiveTimer
 import ru.gressor.gametimer.interactor.Ticker
 import ru.gressor.gametimer.repository.StoredTimer
-import ru.gressor.gametimer.ui.StatedTimer
 import java.text.DecimalFormat
 
 object DF : DecimalFormat("00")
 
-fun StatedTimer.toActive() = ActiveTimer(id, name, Ticker(0))
-
-fun ActiveTimer.toStated(scope: CoroutineScope) =
-    StatedTimer(
-        id,
-        name,
-        ticker.flow
-            .map { it.secondsToString() }
-            .stateIn(scope, SharingStarted.Eagerly, "00:00:00"),
-        ticker.startValue,
-        ticker.isRunning()
-    )
+//fun StatedTimer.toActive() = ActiveTimer(id, name, Ticker(0))
+//
+//fun ActiveTimer.toStated(scope: CoroutineScope) =
+//    StatedTimer(
+//        id,
+//        name,
+//        ticker.flow
+//            .map { it.secondsToString() }
+//            .stateIn(scope, SharingStarted.Eagerly, "00:00:00"),
+//        ticker.startValue,
+//        ticker.isRunning()
+//    )
 
 fun ActiveTimer.toStored() =
     StoredTimer(id, name, ticker.flow.value, ticker.startValue, ticker.isRunning())

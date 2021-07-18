@@ -9,14 +9,15 @@ import androidx.recyclerview.widget.RecyclerView
 import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.flow.collect
 import ru.gressor.gametimer.databinding.ItemMainRecyclerTimerBinding
+import ru.gressor.gametimer.interactor.ActiveTimer
 
 class MainRecyclerAdapter(
     private val controlListener: ControlClickListener
 ) : RecyclerView.Adapter<MainRecyclerAdapter.TimerViewHolder>() {
 
-    private val itemsList = mutableListOf<StatedTimer>()
+    private val itemsList = mutableListOf<ActiveTimer>()
 
-    fun populate(timersFlows: List<StatedTimer>) {
+    fun populate(timersFlows: List<ActiveTimer>) {
         itemsList.clear()
         itemsList.addAll(timersFlows)
         notifyDataSetChanged()
@@ -48,7 +49,7 @@ class MainRecyclerAdapter(
         RecyclerView.ViewHolder(binding.root) {
 
         @InternalCoroutinesApi
-        fun bind(timer: StatedTimer) {
+        fun bind(timer: ActiveTimer) {
             with(binding) {
                 deleteButton.setOnClickListener {
                     controlListener.deleteClick(timer)
@@ -69,7 +70,7 @@ class MainRecyclerAdapter(
     }
 
     interface ControlClickListener {
-        fun toggleClick(timer: StatedTimer)
-        fun deleteClick(timer: StatedTimer)
+        fun toggleClick(timer: ActiveTimer)
+        fun deleteClick(timer: ActiveTimer)
     }
 }
