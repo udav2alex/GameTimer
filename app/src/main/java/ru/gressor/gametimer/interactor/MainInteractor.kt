@@ -1,15 +1,18 @@
 package ru.gressor.gametimer.interactor
 
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import java.util.*
 
 class MainInteractor(
     private val timersRepository: ITimersRepository
 ) {
-    private val _updateListFlow = MutableStateFlow(0L)
-    val updateListFlow: StateFlow<Long> = _updateListFlow.asStateFlow()
+    private val _updateListStatusFlow = MutableStateFlow(0L)
+    val updateListStatusFlow: StateFlow<Long> = _updateListStatusFlow.asStateFlow()
 
-    private val _timersList = mutableListOf<Flow<ActiveTimer>>()
-    val timersList: List<Flow<ActiveTimer>> = _timersList
+    private val _timersList = mutableListOf<ActiveTimer>()
+    val timersList: List<ActiveTimer> = _timersList
 
     init {
         updateTimersList()
@@ -20,20 +23,29 @@ class MainInteractor(
         updateTimersList()
     }
 
-    fun deleteTimer(timer: ActiveTimer) {
-        timersRepository.deleteTimer(timer)
-        updateTimersList()
+    fun toggleTimerById(id: UUID) {
+        _timersList.find {
+            it.id == id
+        }?.let {
+            it.ticker.start()
+            storeTimer(it)
+        }
+    }
+
+    fun deleteTimerById(id: UUID) {
+        _timersList.find {
+            it.id == id
+        }?.let {
+            timersRepository.deleteTimer(it)
+            updateTimersList()
+        }
     }
 
     private fun updateTimersList() {
         _timersList.clear()
         timersRepository.getAllTimers().forEach {
-            _timersList.add(
-                flow {
-                    emit(it)
-                }
-            )
+            _timersList.add(it)
         }
-        _updateListFlow.value = System.currentTimeMillis()
+        _updateListStatusFlow.value = System.currentTimeMillis()
     }
 }

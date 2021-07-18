@@ -2,10 +2,11 @@ package ru.gressor.gametimer.interactor
 
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
 class Ticker(
-    startValue: Int,
+    val startValue: Int,
     private val finishValue: Int = 0,
     private var isRunning: Boolean = false,
     private val pauseMillis: Long = 1000L
@@ -15,7 +16,7 @@ class Ticker(
     private val _flow: MutableStateFlow<Int> = MutableStateFlow(startValue)
     private var _finished = false
 
-    val flow = _flow.asStateFlow()
+    val flow: StateFlow<Int> = _flow.asStateFlow()
     val finished get() = _finished
 
     private var value = startValue

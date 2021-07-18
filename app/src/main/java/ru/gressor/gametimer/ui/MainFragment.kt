@@ -6,9 +6,8 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.lifecycle.*
 import androidx.recyclerview.widget.LinearLayoutManager
-import kotlinx.coroutines.InternalCoroutinesApi
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
 import ru.gressor.gametimer.databinding.FragmentMainBinding
 import ru.gressor.gametimer.interactor.MainInteractor
 import ru.gressor.gametimer.repository.TimersRepositoryList
@@ -25,7 +24,6 @@ class MainFragment : BaseFragment<FragmentMainBinding>(), MainRecyclerAdapter.Co
     }
     private lateinit var adapter: MainRecyclerAdapter
 
-    @InternalCoroutinesApi
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         adapter = MainRecyclerAdapter(this)
 
@@ -34,10 +32,10 @@ class MainFragment : BaseFragment<FragmentMainBinding>(), MainRecyclerAdapter.Co
             timersRecycler.layoutManager = LinearLayoutManager(context)
 
             lifecycleScope.launch {
-                vModel.updateFlow
+                vModel.updateListStatusFlow
                     .flowWithLifecycle(lifecycle, Lifecycle.State.STARTED)
                     .collect {
-                        adapter.populate(vModel.timersStates)
+                        adapter.populate(vModel.statedTimers)
                     }
             }
 

@@ -2,17 +2,21 @@ package ru.gressor.gametimer.ui
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.lifecycle.coroutineScope
+import androidx.lifecycle.findViewTreeLifecycleOwner
+import androidx.lifecycle.flowWithLifecycle
 import androidx.recyclerview.widget.RecyclerView
-import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.InternalCoroutinesApi
+import kotlinx.coroutines.flow.collect
 import ru.gressor.gametimer.databinding.ItemMainRecyclerTimerBinding
 
 class MainRecyclerAdapter(
     private val controlListener: ControlClickListener
 ) : RecyclerView.Adapter<MainRecyclerAdapter.TimerViewHolder>() {
 
-    private val itemsList = mutableListOf<StateFlow<StatedTimer>>()
+    private val itemsList = mutableListOf<StatedTimer>()
 
-    fun populate(timersFlows: List<StateFlow<StatedTimer>>) {
+    fun populate(timersFlows: List<StatedTimer>) {
         itemsList.clear()
         itemsList.addAll(timersFlows)
         notifyDataSetChanged()
@@ -25,8 +29,17 @@ class MainRecyclerAdapter(
             )
         )
 
+    @InternalCoroutinesApi
     override fun onBindViewHolder(holder: TimerViewHolder, position: Int) {
         holder.bind(itemsList[position])
+    }
+
+    override fun onViewAttachedToWindow(holder: TimerViewHolder) {
+        super.onViewAttachedToWindow(holder)
+    }
+
+    override fun onViewDetachedFromWindow(holder: TimerViewHolder) {
+        super.onViewDetachedFromWindow(holder)
     }
 
     override fun getItemCount() = itemsList.size
@@ -34,15 +47,23 @@ class MainRecyclerAdapter(
     inner class TimerViewHolder(private val binding: ItemMainRecyclerTimerBinding) :
         RecyclerView.ViewHolder(binding.root) {
 
-        fun bind(state: StateFlow<StatedTimer>) {
+        @InternalCoroutinesApi
+        fun bind(timer: StatedTimer) {
             with(binding) {
                 deleteButton.setOnClickListener {
-                    controlListener.deleteClick(state.value)
+                    controlListener.deleteClick(timer)
                 }
                 timerToggleButton.setOnClickListener {
-                    controlListener.toggleClick(state.value)
+                    controlListener.toggleClick(timer)
                 }
-                timerTextView.text = state.value.time
+
+//                localScope?.launchWhenStarted {
+//                    timer.timeFlow
+//                        .flowWithLifecycle(localLifecycle)
+//                        .collect {
+//                            timerTextView.text = it
+//                        }
+//                }
             }
         }
     }

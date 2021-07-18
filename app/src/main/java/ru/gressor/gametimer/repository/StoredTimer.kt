@@ -6,6 +6,7 @@ data class StoredTimer(
     val id: UUID,
     var name: String = "",
     var seconds: Int = 0,
+    val initialSeconds: Int = 0,
     var running: Boolean = false
 ) {
     override fun equals(other: Any?) =
@@ -18,6 +19,6 @@ data class StoredTimer(
     }
 
     companion object {
-        val empty = StoredTimer(UUID.randomUUID(), "", 0, false)
+        val empty = StoredTimer(UUID.randomUUID())
     }
 }
