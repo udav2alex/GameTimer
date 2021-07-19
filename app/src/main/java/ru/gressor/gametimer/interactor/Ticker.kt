@@ -19,23 +19,28 @@ class Ticker(
     val flow: StateFlow<Int> = _flow.asStateFlow()
     val finished get() = _finished
 
-    private var value = startValue
+    private var currentValue = startValue
         set(value) {
             // TODO need to be checked?
             if (_flow.value != value) _flow.value = value
             field = value
         }
 
+    init {
+        if (isRunning) start()
+    }
+
     fun isRunning() = isRunning
 
     fun start() {
         isRunning = true
         job = CoroutineScope(Dispatchers.IO).launch {
-            while (!_finished && value != finishValue) {
+            while (!_finished && currentValue != finishValue) {
                 delay(pauseMillis)
                 getValueThenNext()
             }
             _finished = true
+            isRunning = false
         }
     }
 
@@ -50,6 +55,6 @@ class Ticker(
     }
 
     private fun getValueThenNext(): Int {
-        return value.also { value++ }
+        return currentValue.also { currentValue-- }
     }
 }

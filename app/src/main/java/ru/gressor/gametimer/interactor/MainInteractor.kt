@@ -27,7 +27,11 @@ class MainInteractor(
         _timersList.find {
             it.id == id
         }?.let {
-            it.ticker.start()
+            if (it.ticker.isRunning()) {
+                it.ticker.stop()
+            } else {
+                it.ticker.start()
+            }
             storeTimer(it)
         }
     }

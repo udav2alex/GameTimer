@@ -12,7 +12,7 @@ class TimersRepositoryList: ITimersRepository {
         val storedTimer = timer.toStored()
 
         list.indexOf(storedTimer).let {
-            if (it > 0) {
+            if (it >= 0) {
                 list[it] = storedTimer
             } else {
                 list.add(storedTimer)
