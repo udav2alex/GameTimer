@@ -43,9 +43,7 @@ class MainInteractor(
 
     private fun updateTimersList() {
         _timersList.clear()
-        timersRepository.getAllTimers().forEach {
-            _timersList.add(it)
-        }
+        _timersList.addAll(timersRepository.getAllTimers())
         _updateListStatusFlow.value = System.currentTimeMillis()
     }
 }
