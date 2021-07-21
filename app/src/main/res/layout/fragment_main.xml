@@ -17,11 +17,12 @@
 
     <Button
         android:id="@+id/add_timer_button"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_margin="@dimen/gap_standard_16dp"
         android:text="@string/add_timer"
         android:textSize="@dimen/buttons_text_size"
+        app:layout_constraintStart_toEndOf="@id/time_edit_text"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
@@ -34,7 +35,7 @@
         android:hint="@string/time_edit_text_hint"
         android:inputType="number"
         android:maxLength="4"
-        android:textSize="@dimen/timer_text_size_32sp"
+        android:textSize="@dimen/timer_text_size_30sp"
         android:textAlignment="center"
         app:layout_constraintBottom_toBottomOf="@id/add_timer_button"
         app:layout_constraintEnd_toStartOf="@id/add_timer_button"

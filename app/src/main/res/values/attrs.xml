@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="CustomProgressBar">
+        <attr name="startValue" format="float" />
+        <attr name="finishValue" format="float" />
+        <attr name="currentValue" format="float" />
+        <attr name="tint" format="color" />
+    </declare-styleable>
+</resources>

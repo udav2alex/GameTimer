@@ -14,22 +14,26 @@ class MainInteractor(
     private val _timersList = mutableListOf<ActiveTimer>()
     val timersList: List<ActiveTimer> = _timersList
 
-    init {
-        updateTimersList()
-    }
 
     fun storeTimer(timer: ActiveTimer) {
-        timersRepository.storeTimer(timer)
-        updateTimersList()
+        _timersList.indexOf(timer).let {
+            if (it < 0) {
+                _timersList.add(timer)
+            }
+        }
+        _updateListStatusFlow.value = System.currentTimeMillis()
     }
 
     fun toggleTimerById(id: UUID) {
         _timersList.find {
             it.id == id
         }?.let {
-            if (it.ticker.isRunning()) {
+            if (it.ticker.isRunning) {
                 it.ticker.stop()
             } else {
+                _timersList.forEach { timer ->
+                    if (timer.ticker.isRunning) timer.ticker.stop()
+                }
                 it.ticker.start()
             }
             storeTimer(it)
@@ -40,11 +44,12 @@ class MainInteractor(
         _timersList.find {
             it.id == id
         }?.let {
-            timersRepository.deleteTimer(it)
-            updateTimersList()
+            _timersList.remove(it)
+            _updateListStatusFlow.value = System.currentTimeMillis()
         }
     }
 
+    // TODO implement backup timers later
     private fun updateTimersList() {
         _timersList.clear()
         _timersList.addAll(timersRepository.getAllTimers())

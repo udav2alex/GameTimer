@@ -1,17 +1,19 @@
 package ru.gressor.gametimer.ui
 
+import android.graphics.Color
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
-import androidx.lifecycle.coroutineScope
-import androidx.lifecycle.findViewTreeLifecycleOwner
-import androidx.lifecycle.flowWithLifecycle
 import androidx.recyclerview.widget.RecyclerView
+import androidx.vectordrawable.graphics.drawable.AnimatedVectorDrawableCompat
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.collect
+import ru.gressor.gametimer.R
 import ru.gressor.gametimer.databinding.ItemMainRecyclerTimerBinding
 import ru.gressor.gametimer.interactor.ActiveTimer
 import ru.gressor.gametimer.mapping.secondsToString
 
+// TODO Migrate to ListAdapter
 class MainRecyclerAdapter(
     private val controlListener: ControlClickListener
 ) : RecyclerView.Adapter<MainRecyclerAdapter.TimerViewHolder>() {
@@ -53,27 +55,65 @@ class MainRecyclerAdapter(
         private var timer: ActiveTimer? = null
         private var job: Job? = null
 
+        private val imageDrawable =
+            AnimatedVectorDrawableCompat.create(itemView.context, R.drawable.animated_blinker)
+
         @InternalCoroutinesApi
         fun bind(timer: ActiveTimer) {
             this.timer = timer
             with(binding) {
+                blinkerImageView.setImageDrawable(imageDrawable)
+
                 deleteButton.setOnClickListener {
                     controlListener.deleteClick(timer)
                 }
                 timerToggleButton.setOnClickListener {
                     controlListener.toggleClick(timer)
                 }
+
+                progressCircle.currentValue = timer.ticker.flow.value.toFloat()
+                progressCircle.startValue = timer.ticker.startValue.toFloat()
+                progressCircle.finishValue = 0f
                 timerTextView.text = timer.ticker.flow.value.secondsToString()
+
+                if (timer.ticker.isRunning) {
+                    timerToggleButton.text = root.context.getString(R.string.stop)
+                } else {
+                    timerToggleButton.text = root.context.getString(R.string.start)
+                }
+
+                if (timer.ticker.finished) {
+                    itemView.setBackgroundColor(Color.RED)
+                } else {
+                    itemView.setBackgroundColor(Color.WHITE)
+                }
             }
         }
 
         fun prepareForVisibility() {
             job = CoroutineScope(Dispatchers.Main).launch {
-                timer?.let {
-                    it.ticker.flow
+                timer?.ticker?.let {
+                    it.flow
                         .collect { seconds ->
-                            binding.timerTextView.text = seconds.secondsToString()
-                            println(seconds)
+                            with(binding) {
+                                if (it.finished) {
+                                    itemView.setBackgroundColor(Color.RED)
+                                } else {
+                                    itemView.setBackgroundColor(Color.WHITE)
+                                }
+                                if (it.isRunning) {
+                                    blinkerImageView.visibility = View.VISIBLE
+                                    imageDrawable?.start()
+                                    timerToggleButton.text = root.context.getString(R.string.stop)
+                                } else {
+                                    blinkerImageView.visibility = View.INVISIBLE
+                                    imageDrawable?.stop()
+                                    timerToggleButton.text = root.context.getString(R.string.start)
+                                }
+
+                                progressCircle.currentValue = seconds.toFloat()
+                                timerTextView.text = seconds.secondsToString()
+                            }
                         }
                 }
             }
@@ -82,7 +122,8 @@ class MainRecyclerAdapter(
         fun prepareForInvisibility() {
             try {
                 job?.cancel()
-            } catch (e: Throwable) { }
+            } catch (e: Throwable) {
+            }
         }
     }
 

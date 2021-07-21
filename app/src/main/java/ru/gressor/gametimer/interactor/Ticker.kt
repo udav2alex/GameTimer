@@ -8,16 +8,18 @@ import kotlinx.coroutines.flow.asStateFlow
 class Ticker(
     val startValue: Int,
     private val finishValue: Int = 0,
-    private var isRunning: Boolean = false,
+    isRunning: Boolean = false,
     private val pauseMillis: Long = 1000L
 ) {
     private var job: Job? = null
 
     private val _flow: MutableStateFlow<Int> = MutableStateFlow(startValue)
-    private var _finished = false
+    var finished = false
+        private set
+    var isRunning = isRunning
+        private set
 
     val flow: StateFlow<Int> = _flow.asStateFlow()
-    val finished get() = _finished
 
     private var currentValue = startValue
         set(value) {
@@ -30,17 +32,17 @@ class Ticker(
         if (isRunning) start()
     }
 
-    fun isRunning() = isRunning
-
     fun start() {
         isRunning = true
+        finished = false
         job = CoroutineScope(Dispatchers.IO).launch {
-            while (!_finished && currentValue != finishValue) {
+            while (!finished && currentValue != finishValue) {
                 delay(pauseMillis)
                 getValueThenNext()
             }
-            _finished = true
+            finished = true
             isRunning = false
+            resetValue()
         }
     }
 
@@ -56,5 +58,9 @@ class Ticker(
 
     private fun getValueThenNext(): Int {
         return currentValue.also { currentValue-- }
+    }
+
+    private fun resetValue() {
+        currentValue = startValue
     }
 }

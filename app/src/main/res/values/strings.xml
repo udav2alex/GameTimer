@@ -4,6 +4,7 @@
     <string name="delete_timer">Delete timer</string>
     <string name="timer_00_00_00">00:00:00</string>
     <string name="start">START</string>
+    <string name="stop">STOP</string>
     <string name="time_edit_text_hint">Minutes</string>
     <string name="add_timer">Add timer</string>
 </resources>

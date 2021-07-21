@@ -12,7 +12,7 @@ import java.text.DecimalFormat
 object DF : DecimalFormat("00")
 
 fun ActiveTimer.toStored() =
-    StoredTimer(id, name, ticker.flow.value, ticker.startValue, ticker.isRunning())
+    StoredTimer(id, name, ticker.flow.value, ticker.startValue, ticker.isRunning)
 
 fun StoredTimer.toActive() = ActiveTimer(id, name, Ticker(seconds, 0, running))
 

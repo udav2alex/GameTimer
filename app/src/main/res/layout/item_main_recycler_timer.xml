@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
@@ -8,19 +9,20 @@
         android:id="@+id/blinker_image_view"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_margin="@dimen/gap_standard_16dp"
+        android:layout_margin="@dimen/gap_half_8dp"
         android:contentDescription="@string/blinking_point"
         android:src="@drawable/blinker"
+        android:visibility="invisible"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/timer_text_view"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
+        tools:visibility="visible"
         app:tint="?attr/colorPrimary" />
 
     <ImageButton
         android:id="@+id/delete_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_margin="@dimen/gap_half_8dp"
         android:backgroundTint="#00000000"
         android:contentDescription="@string/delete_timer"
         android:src="@drawable/delete"
@@ -35,21 +37,33 @@
         android:layout_height="wrap_content"
         android:layout_margin="@dimen/gap_half_8dp"
         android:text="@string/timer_00_00_00"
-        android:textSize="@dimen/timer_text_size_32sp"
+        android:textSize="@dimen/timer_text_size_30sp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/timer_toggle_button"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintStart_toEndOf="@id/blinker_image_view"
         app:layout_constraintTop_toTopOf="parent" />
+
+    <ru.gressor.gametimer.custom_view.CustomProgressBar
+        android:id="@+id/progress_circle"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="@dimen/gap_half_8dp"
+        app:finishValue="0"
+        app:layout_constraintBottom_toBottomOf="@id/timer_text_view"
+        app:layout_constraintDimensionRatio="1"
+        app:layout_constraintStart_toEndOf="@id/timer_text_view"
+        app:layout_constraintTop_toTopOf="@id/timer_text_view"
+        app:tint="?attr/colorPrimary" />
 
     <Button
         android:id="@+id/timer_toggle_button"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_margin="@dimen/gap_half_8dp"
+        android:layout_marginStart="@dimen/gap_standard_16dp"
         android:text="@string/start"
         android:textSize="@dimen/buttons_text_size"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@id/delete_button"
+        app:layout_constraintStart_toEndOf="@id/progress_circle"
         app:layout_constraintTop_toTopOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
