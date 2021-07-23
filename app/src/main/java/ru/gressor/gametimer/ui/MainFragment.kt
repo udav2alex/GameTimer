@@ -44,7 +44,7 @@ class MainFragment : BaseFragment<FragmentMainBinding>(), MainRecyclerAdapter.Co
                 vModel.updateListStatusFlow
                     .flowWithLifecycle(lifecycle, Lifecycle.State.STARTED)
                     .collect { (_, list) ->
-                        adapter.populate(list)
+                        adapter.submitList(list)
                         listener.setActiveTimer(findActiveTimer(list))
                     }
             }

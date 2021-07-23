@@ -16,10 +16,6 @@ class Ticker(
     private var running = isRunning
     private var currentValue = startValue
 
-    private val state0 = TickerState()
-    private val state1 = TickerState()
-    private var switcher = false
-
     private val _flow: MutableStateFlow<TickerState> = MutableStateFlow(getUpdatedState())
     val flow: StateFlow<TickerState> = _flow.asStateFlow()
 
@@ -28,9 +24,11 @@ class Ticker(
     }
 
     val state: TickerState
-        get() = if (switcher) state0 else state1
+        get() = getUpdatedState()
 
     fun start() {
+        pushStateToFlow()
+
         if (finished) {
             resetValue()
             pushStateToFlow()
@@ -60,7 +58,7 @@ class Ticker(
             // job cancellation
         }
         running = false
-        _flow.value = getUpdatedState()
+        pushStateToFlow()
     }
 
     private fun resetValue() {
@@ -71,18 +69,11 @@ class Ticker(
         _flow.value = getUpdatedState()
     }
 
-    private fun getUpdatedState(): TickerState {
-        switcher = !switcher
-        val state = if (switcher) state0 else state1
-
-        state.let {
-            it.currentValue = currentValue
-            it.startValue = startValue
-            it.finishValue = finishValue
-            it.isRunning = running
-            it.isFinished = finished
-        }
-
-        return state
-    }
+    private fun getUpdatedState() = TickerState(
+        currentValue,
+        startValue,
+        finishValue,
+        running,
+        finished
+    )
 }

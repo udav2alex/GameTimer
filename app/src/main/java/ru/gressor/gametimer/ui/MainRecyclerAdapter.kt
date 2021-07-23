@@ -4,6 +4,8 @@ import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import androidx.vectordrawable.graphics.drawable.AnimatedVectorDrawableCompat
 import kotlinx.coroutines.*
@@ -11,22 +13,12 @@ import kotlinx.coroutines.flow.collect
 import ru.gressor.gametimer.R
 import ru.gressor.gametimer.databinding.ItemMainRecyclerTimerBinding
 import ru.gressor.gametimer.domain.ActiveTimer
-import ru.gressor.gametimer.domain.Ticker
 import ru.gressor.gametimer.domain.TickerState
 import ru.gressor.gametimer.utils.secondsToString
 
-// TODO Migrate to ListAdapter
 class MainRecyclerAdapter(
     private val controlListener: ControlClickListener
-) : RecyclerView.Adapter<MainRecyclerAdapter.TimerViewHolder>() {
-
-    private val itemsList = mutableListOf<ActiveTimer>()
-
-    fun populate(timersFlows: List<ActiveTimer>) {
-        itemsList.clear()
-        itemsList.addAll(timersFlows)
-        notifyDataSetChanged()
-    }
+) : ListAdapter<ActiveTimer, MainRecyclerAdapter.TimerViewHolder>(itemComparator) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) =
         TimerViewHolder(
@@ -37,7 +29,7 @@ class MainRecyclerAdapter(
 
     @InternalCoroutinesApi
     override fun onBindViewHolder(holder: TimerViewHolder, position: Int) {
-        holder.bind(itemsList[position])
+        holder.bind(getItem(position))
     }
 
     override fun onViewAttachedToWindow(holder: TimerViewHolder) {
@@ -50,7 +42,19 @@ class MainRecyclerAdapter(
         super.onViewDetachedFromWindow(holder)
     }
 
-    override fun getItemCount() = itemsList.size
+    private companion object {
+        private val itemComparator = object : DiffUtil.ItemCallback<ActiveTimer>() {
+
+            override fun areItemsTheSame(oldItem: ActiveTimer, newItem: ActiveTimer): Boolean {
+                return oldItem.id == newItem.id
+            }
+
+            override fun areContentsTheSame(oldItem: ActiveTimer, newItem: ActiveTimer): Boolean {
+                return oldItem.id == newItem.id &&
+                        oldItem.name == newItem.name
+            }
+        }
+    }
 
     inner class TimerViewHolder(private val binding: ItemMainRecyclerTimerBinding) :
         RecyclerView.ViewHolder(binding.root) {
@@ -101,7 +105,8 @@ class MainRecyclerAdapter(
         fun prepareForInvisibility() {
             try {
                 job?.cancel()
-            } catch (e: Throwable) { }
+            } catch (e: Throwable) {
+            }
         }
 
         private fun ItemMainRecyclerTimerBinding.configureViews(state: TickerState) {

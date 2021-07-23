@@ -1,9 +1,9 @@
 package ru.gressor.gametimer.domain
 
 data class TickerState(
-    var currentValue: Long = 0L,
-    var startValue: Long = 0L,
-    var finishValue: Long = 0L,
-    var isRunning: Boolean = false,
-    var isFinished: Boolean = false
+    val currentValue: Long = 0L,
+    val startValue: Long = 0L,
+    val finishValue: Long = 0L,
+    val isRunning: Boolean = false,
+    val isFinished: Boolean = false
 )
