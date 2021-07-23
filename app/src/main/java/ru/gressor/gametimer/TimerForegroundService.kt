@@ -11,8 +11,8 @@ import android.os.IBinder
 import androidx.core.app.NotificationCompat
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.collectLatest
-import ru.gressor.gametimer.interactor.ActiveTimer
-import ru.gressor.gametimer.interactor.Ticker
+import ru.gressor.gametimer.domain.ActiveTimer
+import ru.gressor.gametimer.domain.Ticker
 import ru.gressor.gametimer.utils.secondsToString
 import ru.gressor.gametimer.utils.toUUID
 import java.util.*
@@ -89,13 +89,13 @@ class TimerForegroundService : Service() {
 
                 try {
                     job = GlobalScope.launch(Dispatchers.Main) {
-                        it.flow.collectLatest { time ->
+                        it.flow.collectLatest { state ->
                             notificationManager?.notify(
                                 NOTIFICATION_ID,
-                                builder.setContentText(time.secondsToString()).build()
+                                builder.setContentText(state.currentValue.secondsToString()).build()
                             )
 
-                            if (time <= 0L) {
+                            if (state.currentValue <= 0L) {
                                 cancel()
                             }
                         }

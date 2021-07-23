@@ -1,4 +1,4 @@
-package ru.gressor.gametimer.interactor
+package ru.gressor.gametimer.domain
 
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -28,11 +28,11 @@ class MainInteractor(
         _timersList.find {
             it.id == id
         }?.let {
-            if (it.ticker.running) {
+            if (it.ticker.state.isRunning) {
                 it.ticker.stop()
             } else {
                 _timersList.forEach { timer ->
-                    if (timer.ticker.running) timer.ticker.stop()
+                    if (timer.ticker.state.isRunning) timer.ticker.stop()
                 }
                 it.ticker.start()
             }

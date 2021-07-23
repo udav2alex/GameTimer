@@ -9,8 +9,8 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import ru.gressor.gametimer.databinding.FragmentMainBinding
-import ru.gressor.gametimer.interactor.ActiveTimer
-import ru.gressor.gametimer.interactor.MainInteractor
+import ru.gressor.gametimer.domain.ActiveTimer
+import ru.gressor.gametimer.domain.MainInteractor
 import ru.gressor.gametimer.repository.TimersRepositoryList
 import ru.gressor.gametimer.vm.MainVModel
 import ru.gressor.gametimer.vm.MainVModelFactory
@@ -66,7 +66,7 @@ class MainFragment : BaseFragment<FragmentMainBinding>(), MainRecyclerAdapter.Co
     override fun getBinding(inflater: LayoutInflater, container: ViewGroup?) =
         FragmentMainBinding.inflate(inflater, container, false)
 
-    private fun findActiveTimer(list: List<ActiveTimer>) = list.find { it.ticker.running }
+    private fun findActiveTimer(list: List<ActiveTimer>) = list.find { it.ticker.state.isRunning }
 
     interface ActiveTimerListener {
         fun setActiveTimer(timer: ActiveTimer?)

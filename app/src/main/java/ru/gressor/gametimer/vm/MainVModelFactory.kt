@@ -2,7 +2,7 @@ package ru.gressor.gametimer.vm
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import ru.gressor.gametimer.interactor.MainInteractor
+import ru.gressor.gametimer.domain.MainInteractor
 
 class MainVModelFactory(
     private val mainInteractor: MainInteractor

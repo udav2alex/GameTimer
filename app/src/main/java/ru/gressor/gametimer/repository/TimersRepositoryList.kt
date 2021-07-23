@@ -1,7 +1,7 @@
 package ru.gressor.gametimer.repository
 
-import ru.gressor.gametimer.interactor.ActiveTimer
-import ru.gressor.gametimer.interactor.ITimersRepository
+import ru.gressor.gametimer.domain.ActiveTimer
+import ru.gressor.gametimer.domain.ITimersRepository
 import ru.gressor.gametimer.utils.toActive
 import ru.gressor.gametimer.utils.toStored
 

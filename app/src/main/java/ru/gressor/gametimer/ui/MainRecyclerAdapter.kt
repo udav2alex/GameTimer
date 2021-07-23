@@ -10,8 +10,9 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.collect
 import ru.gressor.gametimer.R
 import ru.gressor.gametimer.databinding.ItemMainRecyclerTimerBinding
-import ru.gressor.gametimer.interactor.ActiveTimer
-import ru.gressor.gametimer.interactor.Ticker
+import ru.gressor.gametimer.domain.ActiveTimer
+import ru.gressor.gametimer.domain.Ticker
+import ru.gressor.gametimer.domain.TickerState
 import ru.gressor.gametimer.utils.secondsToString
 
 // TODO Migrate to ListAdapter
@@ -72,12 +73,12 @@ class MainRecyclerAdapter(
                     controlListener.toggleClick(timer)
                 }
 
-                progressCircle.currentValue = timer.ticker.flow.value.toFloat()
+                progressCircle.currentValue = timer.ticker.flow.value.currentValue.toFloat()
                 progressCircle.startValue = timer.ticker.startValue.toFloat()
                 progressCircle.finishValue = 0f
-                timerTextView.text = timer.ticker.flow.value.secondsToString()
+                timerTextView.text = timer.ticker.flow.value.currentValue.secondsToString()
 
-                configureViews(timer.ticker)
+                configureViews(timer.ticker.state)
             }
         }
 
@@ -85,12 +86,12 @@ class MainRecyclerAdapter(
             job = CoroutineScope(Dispatchers.Main).launch {
                 timer?.ticker?.let {
                     it.flow
-                        .collect { seconds ->
+                        .collect { state ->
                             with(binding) {
-                                progressCircle.currentValue = seconds.toFloat()
-                                timerTextView.text = seconds.secondsToString()
+                                progressCircle.currentValue = state.currentValue.toFloat()
+                                timerTextView.text = state.currentValue.secondsToString()
 
-                                configureViews(it)
+                                configureViews(state)
                             }
                         }
                 }
@@ -103,13 +104,13 @@ class MainRecyclerAdapter(
             } catch (e: Throwable) { }
         }
 
-        private fun ItemMainRecyclerTimerBinding.configureViews(ticker: Ticker) {
-            if (ticker.finished) {
+        private fun ItemMainRecyclerTimerBinding.configureViews(state: TickerState) {
+            if (state.isFinished) {
                 itemView.setBackgroundColor(Color.RED)
             } else {
                 itemView.setBackgroundColor(Color.WHITE)
             }
-            if (ticker.running) {
+            if (state.isRunning) {
                 imageDrawable?.start()
                 blinkerImageView.visibility = View.VISIBLE
                 timerToggleButton.text = root.context.getString(R.string.stop)

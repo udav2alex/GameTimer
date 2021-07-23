@@ -1,7 +1,7 @@
 package ru.gressor.gametimer.utils
 
-import ru.gressor.gametimer.interactor.ActiveTimer
-import ru.gressor.gametimer.interactor.Ticker
+import ru.gressor.gametimer.domain.ActiveTimer
+import ru.gressor.gametimer.domain.Ticker
 import ru.gressor.gametimer.repository.StoredTimer
 import java.text.DecimalFormat
 import java.util.*
@@ -11,7 +11,7 @@ object DF : DecimalFormat("00")
 fun String.toUUID(): UUID = UUID.fromString(this)
 
 fun ActiveTimer.toStored() =
-    StoredTimer(id, name, ticker.flow.value, ticker.startValue, ticker.running)
+    StoredTimer(id, name, ticker.flow.value.currentValue, ticker.startValue, ticker.state.isRunning)
 
 fun StoredTimer.toActive() = ActiveTimer(id, name, Ticker(time, 0, running))
 

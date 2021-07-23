@@ -10,7 +10,7 @@ import ru.gressor.gametimer.TimerForegroundService.Companion.TIMER_FROM_ACTIVITY
 import ru.gressor.gametimer.TimerForegroundService.Companion.TIMER_FROM_ACTIVITY_NAME
 import ru.gressor.gametimer.TimerForegroundService.Companion.TIMER_FROM_ACTIVITY_VALUE
 import ru.gressor.gametimer.databinding.ActivityMainBinding
-import ru.gressor.gametimer.interactor.ActiveTimer
+import ru.gressor.gametimer.domain.ActiveTimer
 import ru.gressor.gametimer.ui.MainFragment
 
 class MainActivity : AppCompatActivity(), MainFragment.ActiveTimerListener {
@@ -40,10 +40,10 @@ class MainActivity : AppCompatActivity(), MainFragment.ActiveTimerListener {
 
     override fun onStop() {
         timer?.let {
-            if (it.ticker.running) {
+            if (it.ticker.state.isRunning) {
                 val startIntent = Intent(this, TimerForegroundService::class.java)
                 startIntent.putExtra(COMMAND_ID, COMMAND_START)
-                startIntent.putExtra(TIMER_FROM_ACTIVITY_VALUE, it.ticker.flow.value)
+                startIntent.putExtra(TIMER_FROM_ACTIVITY_VALUE, it.ticker.flow.value.currentValue)
                 startIntent.putExtra(TIMER_FROM_ACTIVITY_ID, it.id.toString())
                 startIntent.putExtra(TIMER_FROM_ACTIVITY_NAME, it.name)
                 startService(startIntent)

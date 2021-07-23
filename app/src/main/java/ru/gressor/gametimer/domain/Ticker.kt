@@ -1,4 +1,4 @@
-package ru.gressor.gametimer.interactor
+package ru.gressor.gametimer.domain
 
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -12,27 +12,33 @@ class Ticker(
     private val pauseMillis: Long = 1000L
 ) {
     private var job: Job? = null
-    var finished = false
-        private set
-    var running = isRunning
-        private set
+    private var finished = false
+    private var running = isRunning
     private var currentValue = startValue
 
-    private val _flow: MutableStateFlow<Long> = MutableStateFlow(startValue)
-    val flow: StateFlow<Long> = _flow.asStateFlow()
+    private val state0 = TickerState()
+    private val state1 = TickerState()
+    private var switcher = false
+
+    private val _flow: MutableStateFlow<TickerState> = MutableStateFlow(getUpdatedState())
+    val flow: StateFlow<TickerState> = _flow.asStateFlow()
 
     init {
         if (isRunning) start()
     }
 
+    val state: TickerState
+        get() = if (switcher) state0 else state1
+
     fun start() {
         if (finished) {
             resetValue()
-            _flow.value = currentValue
+            pushStateToFlow()
         }
 
         running = true
         finished = false
+
         job = CoroutineScope(Dispatchers.IO).launch {
             while (!finished && currentValue > finishValue) {
                 delay(pauseMillis)
@@ -42,21 +48,41 @@ class Ticker(
                     finished = true
                     running = false
                 }
-                _flow.value = currentValue
+                pushStateToFlow()
             }
         }
     }
 
     fun stop() {
-        running = false
         try {
             job?.cancel("Self cancelled...")
         } catch (e: Throwable) {
             // job cancellation
         }
+        running = false
+        _flow.value = getUpdatedState()
     }
 
     private fun resetValue() {
         currentValue = startValue
+    }
+
+    private fun pushStateToFlow() {
+        _flow.value = getUpdatedState()
+    }
+
+    private fun getUpdatedState(): TickerState {
+        switcher = !switcher
+        val state = if (switcher) state0 else state1
+
+        state.let {
+            it.currentValue = currentValue
+            it.startValue = startValue
+            it.finishValue = finishValue
+            it.isRunning = running
+            it.isFinished = finished
+        }
+
+        return state
     }
 }

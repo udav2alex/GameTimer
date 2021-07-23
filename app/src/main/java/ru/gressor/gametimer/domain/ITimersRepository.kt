@@ -1,4 +1,4 @@
-package ru.gressor.gametimer.interactor
+package ru.gressor.gametimer.domain
 
 interface ITimersRepository {
     fun storeTimer(timer: ActiveTimer)

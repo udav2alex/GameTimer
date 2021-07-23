@@ -1,10 +1,9 @@
 package ru.gressor.gametimer.vm
 
 import androidx.lifecycle.ViewModel
-import kotlinx.coroutines.flow.StateFlow
-import ru.gressor.gametimer.interactor.ActiveTimer
-import ru.gressor.gametimer.interactor.MainInteractor
-import ru.gressor.gametimer.interactor.Ticker
+import ru.gressor.gametimer.domain.ActiveTimer
+import ru.gressor.gametimer.domain.MainInteractor
+import ru.gressor.gametimer.domain.Ticker
 import java.text.SimpleDateFormat
 import java.util.*
 
