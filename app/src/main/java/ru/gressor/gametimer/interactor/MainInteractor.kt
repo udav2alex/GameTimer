@@ -28,11 +28,11 @@ class MainInteractor(
         _timersList.find {
             it.id == id
         }?.let {
-            if (it.ticker.isRunning) {
+            if (it.ticker.running) {
                 it.ticker.stop()
             } else {
                 _timersList.forEach { timer ->
-                    if (timer.ticker.isRunning) timer.ticker.stop()
+                    if (timer.ticker.running) timer.ticker.stop()
                 }
                 it.ticker.start()
             }

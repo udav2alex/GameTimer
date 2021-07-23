@@ -11,7 +11,7 @@ object DF : DecimalFormat("00")
 fun String.toUUID(): UUID = UUID.fromString(this)
 
 fun ActiveTimer.toStored() =
-    StoredTimer(id, name, ticker.flow.value, ticker.startValue, ticker.isRunning)
+    StoredTimer(id, name, ticker.flow.value, ticker.startValue, ticker.running)
 
 fun StoredTimer.toActive() = ActiveTimer(id, name, Ticker(time, 0, running))
 

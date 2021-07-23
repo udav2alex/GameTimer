@@ -66,7 +66,7 @@ class MainFragment : BaseFragment<FragmentMainBinding>(), MainRecyclerAdapter.Co
     override fun getBinding(inflater: LayoutInflater, container: ViewGroup?) =
         FragmentMainBinding.inflate(inflater, container, false)
 
-    private fun findActiveTimer(list: List<ActiveTimer>) = list.find { it.ticker.isRunning }
+    private fun findActiveTimer(list: List<ActiveTimer>) = list.find { it.ticker.running }
 
     interface ActiveTimerListener {
         fun setActiveTimer(timer: ActiveTimer?)

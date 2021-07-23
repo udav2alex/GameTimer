@@ -40,10 +40,6 @@ class TimerForegroundService : Service() {
     private fun getPendingIntent(): PendingIntent? {
         val resultIntent = Intent(this, MainActivity::class.java)
         resultIntent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
-        timer?.let {
-            resultIntent.putExtra(TIMER_FROM_SERVICE_VALUE, it.ticker.flow.value)
-            resultIntent.putExtra(TIMER_FROM_SERVICE_ID, it.id.toString())
-        }
         return PendingIntent
             .getActivity(this, 0, resultIntent, PendingIntent.FLAG_ONE_SHOT)
     }
@@ -86,7 +82,6 @@ class TimerForegroundService : Service() {
         try {
             moveToStartedState()
             startForegroundAndShowNotification()
-            notificationManager?.notify(NOTIFICATION_ID, builder.setContentText("content").build())
 
             if (timer == null) timer = ActiveTimer(id, name, Ticker(startTime))
             timer?.ticker?.let {
@@ -100,10 +95,8 @@ class TimerForegroundService : Service() {
                                 builder.setContentText(time.secondsToString()).build()
                             )
 
-                            println("$time ${System.currentTimeMillis()}")
-                            if (time == 0L) {
-                                println("cancel() ${System.currentTimeMillis()}")
-//                                cancel()
+                            if (time <= 0L) {
+                                cancel()
                             }
                         }
                     }
@@ -140,7 +133,7 @@ class TimerForegroundService : Service() {
 
     private fun startForegroundAndShowNotification() {
         createChannel()
-        val notification = builder.setContentText("content").build()
+        val notification = builder.setContentText("starting...").build()
         startForeground(NOTIFICATION_ID, notification)
     }
 
@@ -165,8 +158,6 @@ class TimerForegroundService : Service() {
         const val COMMAND_STOP = "COMMAND_STOP"
         const val COMMAND_ID = "COMMAND_ID"
 
-        const val TIMER_FROM_SERVICE_VALUE = "TIMER_FROM_SERVICE_VALUE"
-        const val TIMER_FROM_SERVICE_ID = "TIMER_FROM_SERVICE_ID"
         const val TIMER_FROM_ACTIVITY_VALUE = "TIMER_FROM_ACTIVITY_VALUE"
         const val TIMER_FROM_ACTIVITY_ID = "TIMER_FROM_ACTIVITY_ID"
         const val TIMER_FROM_ACTIVITY_NAME = "TIMER_FROM_ACTIVITY_NAME"

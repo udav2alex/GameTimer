@@ -12,51 +12,48 @@ class Ticker(
     private val pauseMillis: Long = 1000L
 ) {
     private var job: Job? = null
-
-    private val _flow: MutableStateFlow<Long> = MutableStateFlow(startValue)
     var finished = false
         private set
-    var isRunning = isRunning
+    var running = isRunning
         private set
-
-    val flow: StateFlow<Long> = _flow.asStateFlow()
-
     private var currentValue = startValue
-        set(value) {
-            // TODO need to be checked?
-            if (_flow.value != value) _flow.value = value
-            field = value
-        }
+
+    private val _flow: MutableStateFlow<Long> = MutableStateFlow(startValue)
+    val flow: StateFlow<Long> = _flow.asStateFlow()
 
     init {
         if (isRunning) start()
     }
 
     fun start() {
-        isRunning = true
+        if (finished) {
+            resetValue()
+            _flow.value = currentValue
+        }
+
+        running = true
         finished = false
         job = CoroutineScope(Dispatchers.IO).launch {
-            while (!finished && currentValue >= finishValue) {
+            while (!finished && currentValue > finishValue) {
                 delay(pauseMillis)
-                getValueThenNext()
+                currentValue--
+
+                if (currentValue == 0L) {
+                    finished = true
+                    running = false
+                }
+                _flow.value = currentValue
             }
-            finished = true
-            isRunning = false
-            resetValue()
         }
     }
 
     fun stop() {
-        isRunning = false
+        running = false
         try {
             job?.cancel("Self cancelled...")
         } catch (e: Throwable) {
             // job cancellation
         }
-    }
-
-    private fun getValueThenNext(): Long {
-        return currentValue.also { currentValue-- }
     }
 
     private fun resetValue() {

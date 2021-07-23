@@ -5,13 +5,13 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import ru.gressor.gametimer.TimerForegroundService.Companion.COMMAND_ID
 import ru.gressor.gametimer.TimerForegroundService.Companion.COMMAND_START
+import ru.gressor.gametimer.TimerForegroundService.Companion.COMMAND_STOP
 import ru.gressor.gametimer.TimerForegroundService.Companion.TIMER_FROM_ACTIVITY_ID
 import ru.gressor.gametimer.TimerForegroundService.Companion.TIMER_FROM_ACTIVITY_NAME
 import ru.gressor.gametimer.TimerForegroundService.Companion.TIMER_FROM_ACTIVITY_VALUE
 import ru.gressor.gametimer.databinding.ActivityMainBinding
 import ru.gressor.gametimer.interactor.ActiveTimer
 import ru.gressor.gametimer.ui.MainFragment
-import java.util.*
 
 class MainActivity : AppCompatActivity(), MainFragment.ActiveTimerListener {
     private lateinit var binding: ActivityMainBinding
@@ -30,14 +30,24 @@ class MainActivity : AppCompatActivity(), MainFragment.ActiveTimerListener {
         }
     }
 
+    override fun onStart() {
+        val startIntent = Intent(this, TimerForegroundService::class.java)
+        startIntent.putExtra(COMMAND_ID, COMMAND_STOP)
+        startService(startIntent)
+
+        super.onStart()
+    }
+
     override fun onStop() {
         timer?.let {
-            val startIntent = Intent(this, TimerForegroundService::class.java)
-            startIntent.putExtra(COMMAND_ID, COMMAND_START)
-            startIntent.putExtra(TIMER_FROM_ACTIVITY_VALUE, it.ticker.flow.value)
-            startIntent.putExtra(TIMER_FROM_ACTIVITY_ID, it.id.toString())
-            startIntent.putExtra(TIMER_FROM_ACTIVITY_NAME, it.name)
-            startService(startIntent)
+            if (it.ticker.running) {
+                val startIntent = Intent(this, TimerForegroundService::class.java)
+                startIntent.putExtra(COMMAND_ID, COMMAND_START)
+                startIntent.putExtra(TIMER_FROM_ACTIVITY_VALUE, it.ticker.flow.value)
+                startIntent.putExtra(TIMER_FROM_ACTIVITY_ID, it.id.toString())
+                startIntent.putExtra(TIMER_FROM_ACTIVITY_NAME, it.name)
+                startService(startIntent)
+            }
         }
 
         super.onStop()

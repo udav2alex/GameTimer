@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.collect
 import ru.gressor.gametimer.R
 import ru.gressor.gametimer.databinding.ItemMainRecyclerTimerBinding
 import ru.gressor.gametimer.interactor.ActiveTimer
+import ru.gressor.gametimer.interactor.Ticker
 import ru.gressor.gametimer.utils.secondsToString
 
 // TODO Migrate to ListAdapter
@@ -76,17 +77,7 @@ class MainRecyclerAdapter(
                 progressCircle.finishValue = 0f
                 timerTextView.text = timer.ticker.flow.value.secondsToString()
 
-                if (timer.ticker.isRunning) {
-                    timerToggleButton.text = root.context.getString(R.string.stop)
-                } else {
-                    timerToggleButton.text = root.context.getString(R.string.start)
-                }
-
-                if (timer.ticker.finished) {
-                    itemView.setBackgroundColor(Color.RED)
-                } else {
-                    itemView.setBackgroundColor(Color.WHITE)
-                }
+                configureViews(timer.ticker)
             }
         }
 
@@ -96,23 +87,10 @@ class MainRecyclerAdapter(
                     it.flow
                         .collect { seconds ->
                             with(binding) {
-                                if (it.finished) {
-                                    itemView.setBackgroundColor(Color.RED)
-                                } else {
-                                    itemView.setBackgroundColor(Color.WHITE)
-                                }
-                                if (it.isRunning) {
-                                    blinkerImageView.visibility = View.VISIBLE
-                                    imageDrawable?.start()
-                                    timerToggleButton.text = root.context.getString(R.string.stop)
-                                } else {
-                                    blinkerImageView.visibility = View.INVISIBLE
-                                    imageDrawable?.stop()
-                                    timerToggleButton.text = root.context.getString(R.string.start)
-                                }
-
                                 progressCircle.currentValue = seconds.toFloat()
                                 timerTextView.text = seconds.secondsToString()
+
+                                configureViews(it)
                             }
                         }
                 }
@@ -122,7 +100,23 @@ class MainRecyclerAdapter(
         fun prepareForInvisibility() {
             try {
                 job?.cancel()
-            } catch (e: Throwable) {
+            } catch (e: Throwable) { }
+        }
+
+        private fun ItemMainRecyclerTimerBinding.configureViews(ticker: Ticker) {
+            if (ticker.finished) {
+                itemView.setBackgroundColor(Color.RED)
+            } else {
+                itemView.setBackgroundColor(Color.WHITE)
+            }
+            if (ticker.running) {
+                imageDrawable?.start()
+                blinkerImageView.visibility = View.VISIBLE
+                timerToggleButton.text = root.context.getString(R.string.stop)
+            } else {
+                imageDrawable?.stop()
+                blinkerImageView.visibility = View.INVISIBLE
+                timerToggleButton.text = root.context.getString(R.string.start)
             }
         }
     }
