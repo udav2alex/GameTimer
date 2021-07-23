@@ -2,8 +2,8 @@ package ru.gressor.gametimer.repository
 
 import ru.gressor.gametimer.interactor.ActiveTimer
 import ru.gressor.gametimer.interactor.ITimersRepository
-import ru.gressor.gametimer.mapping.toActive
-import ru.gressor.gametimer.mapping.toStored
+import ru.gressor.gametimer.utils.toActive
+import ru.gressor.gametimer.utils.toStored
 
 class TimersRepositoryList: ITimersRepository {
     private val list = mutableListOf<StoredTimer>()

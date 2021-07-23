@@ -11,7 +11,7 @@ import kotlinx.coroutines.flow.collect
 import ru.gressor.gametimer.R
 import ru.gressor.gametimer.databinding.ItemMainRecyclerTimerBinding
 import ru.gressor.gametimer.interactor.ActiveTimer
-import ru.gressor.gametimer.mapping.secondsToString
+import ru.gressor.gametimer.utils.secondsToString
 
 // TODO Migrate to ListAdapter
 class MainRecyclerAdapter(

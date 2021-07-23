@@ -18,11 +18,10 @@ import ru.gressor.gametimer.vm.MainVModelFactory
 class MainFragment : BaseFragment<FragmentMainBinding>(), MainRecyclerAdapter.ControlClickListener {
     private val vModel: MainVModel by lazy {
         ViewModelProvider(
-            this, MainVModelFactory(
-                MainInteractor(TimersRepositoryList())
-            )
+            this, MainVModelFactory(MainInteractor(TimersRepositoryList()))
         ).get()
     }
+
     private lateinit var adapter: MainRecyclerAdapter
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

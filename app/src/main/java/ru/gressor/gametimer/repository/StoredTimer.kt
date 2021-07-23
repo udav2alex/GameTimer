@@ -5,8 +5,8 @@ import java.util.*
 data class StoredTimer(
     val id: UUID,
     var name: String = "",
-    var seconds: Int = 0,
-    val initialSeconds: Int = 0,
+    var time: Long = 0,
+    val initialTime: Long = 0,
     var running: Boolean = false
 ) {
     override fun equals(other: Any?) =

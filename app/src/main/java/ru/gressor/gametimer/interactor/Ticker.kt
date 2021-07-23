@@ -6,20 +6,20 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
 class Ticker(
-    val startValue: Int,
-    private val finishValue: Int = 0,
+    val startValue: Long,
+    private val finishValue: Long = 0L,
     isRunning: Boolean = false,
     private val pauseMillis: Long = 1000L
 ) {
     private var job: Job? = null
 
-    private val _flow: MutableStateFlow<Int> = MutableStateFlow(startValue)
+    private val _flow: MutableStateFlow<Long> = MutableStateFlow(startValue)
     var finished = false
         private set
     var isRunning = isRunning
         private set
 
-    val flow: StateFlow<Int> = _flow.asStateFlow()
+    val flow: StateFlow<Long> = _flow.asStateFlow()
 
     private var currentValue = startValue
         set(value) {
@@ -36,7 +36,7 @@ class Ticker(
         isRunning = true
         finished = false
         job = CoroutineScope(Dispatchers.IO).launch {
-            while (!finished && currentValue != finishValue) {
+            while (!finished && currentValue >= finishValue) {
                 delay(pauseMillis)
                 getValueThenNext()
             }
@@ -51,12 +51,11 @@ class Ticker(
         try {
             job?.cancel("Self cancelled...")
         } catch (e: Throwable) {
-            // TODO
-            println("Ticker Throwable: $e")
+            // job cancellation
         }
     }
 
-    private fun getValueThenNext(): Int {
+    private fun getValueThenNext(): Long {
         return currentValue.also { currentValue-- }
     }
 

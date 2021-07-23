@@ -9,27 +9,41 @@ import android.content.Intent
 import android.os.Build
 import android.os.IBinder
 import androidx.core.app.NotificationCompat
+import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.collectLatest
+import ru.gressor.gametimer.interactor.ActiveTimer
+import ru.gressor.gametimer.interactor.Ticker
+import ru.gressor.gametimer.utils.secondsToString
+import ru.gressor.gametimer.utils.toUUID
+import java.util.*
 
 class TimerForegroundService : Service() {
+    private var timer: ActiveTimer? = null
+    private var job: Job? = null
+
     private var isServiceStarted = false
     private var notificationManager: NotificationManager? = null
 
-    private val builder by lazy {
-        NotificationCompat.Builder(this, CHANNEL_ID)
-            .setDefaults(NotificationCompat.DEFAULT_ALL)
-            .setPriority(NotificationCompat.PRIORITY_HIGH)
-            .setSmallIcon(R.drawable.hourglass)
-            .setContentTitle("Game Timer")
-            .setGroup("Timer")
-            .setGroupSummary(false)
-            .setContentIntent(getPendingIntent())
-            .setAutoCancel(false)
-            .setSilent(true)
-    }
+    private val builder
+        get() =
+            NotificationCompat.Builder(this, CHANNEL_ID)
+                .setDefaults(NotificationCompat.DEFAULT_ALL)
+                .setPriority(NotificationCompat.PRIORITY_HIGH)
+                .setSmallIcon(R.drawable.hourglass)
+                .setContentTitle(timer?.name ?: "Game Timer")
+                .setGroup("Timer")
+                .setGroupSummary(false)
+                .setContentIntent(getPendingIntent())
+                .setAutoCancel(false)
+                .setSilent(true)
 
     private fun getPendingIntent(): PendingIntent? {
         val resultIntent = Intent(this, MainActivity::class.java)
-        resultIntent.flags = Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT
+        resultIntent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
+        timer?.let {
+            resultIntent.putExtra(TIMER_FROM_SERVICE_VALUE, it.ticker.flow.value)
+            resultIntent.putExtra(TIMER_FROM_SERVICE_ID, it.id.toString())
+        }
         return PendingIntent
             .getActivity(this, 0, resultIntent, PendingIntent.FLAG_ONE_SHOT)
     }
@@ -40,6 +54,7 @@ class TimerForegroundService : Service() {
             applicationContext.getSystemService(Context.NOTIFICATION_SERVICE) as? NotificationManager
     }
 
+    @DelicateCoroutinesApi
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         processCommand(intent)
         return START_REDELIVER_INTENT
@@ -49,14 +64,55 @@ class TimerForegroundService : Service() {
         return null
     }
 
+    @DelicateCoroutinesApi
     private fun processCommand(intent: Intent?) {
         when (intent?.extras?.getString(COMMAND_ID) ?: INVALID) {
             INVALID -> return
             COMMAND_STOP -> commandStop()
             COMMAND_START -> {
-                val startTime = intent?.extras?.getLong(STARTED_TIMER_TIME_MS) ?: return
-                commandStart(startTime)
+                val startTime = intent?.extras?.getLong(TIMER_FROM_ACTIVITY_VALUE) ?: return
+                val id = intent.extras?.getString(TIMER_FROM_ACTIVITY_ID)?.toUUID() ?: return
+                val name = intent.extras?.getString(TIMER_FROM_ACTIVITY_NAME) ?: "Current timer"
+                commandStart(id, name, startTime)
             }
+        }
+    }
+
+    @DelicateCoroutinesApi
+    private fun commandStart(id: UUID, name: String, startTime: Long) {
+        if (isServiceStarted) {
+            return
+        }
+        try {
+            moveToStartedState()
+            startForegroundAndShowNotification()
+            notificationManager?.notify(NOTIFICATION_ID, builder.setContentText("content").build())
+
+            if (timer == null) timer = ActiveTimer(id, name, Ticker(startTime))
+            timer?.ticker?.let {
+                it.start()
+
+                try {
+                    job = GlobalScope.launch(Dispatchers.Main) {
+                        it.flow.collectLatest { time ->
+                            notificationManager?.notify(
+                                NOTIFICATION_ID,
+                                builder.setContentText(time.secondsToString()).build()
+                            )
+
+                            println("$time ${System.currentTimeMillis()}")
+                            if (time == 0L) {
+                                println("cancel() ${System.currentTimeMillis()}")
+//                                cancel()
+                            }
+                        }
+                    }
+                } catch (e: Throwable) {
+                    // cancel cause exception
+                }
+            }
+        } finally {
+            isServiceStarted = true
         }
     }
 
@@ -65,41 +121,14 @@ class TimerForegroundService : Service() {
             return
         }
         try {
-//            job?.cancel()
+            job?.cancel()
+            timer?.ticker?.stop()
             stopForeground(true)
             stopSelf()
         } finally {
             isServiceStarted = false
         }
     }
-
-    private fun commandStart(startTime: Long) {
-        if (isServiceStarted) {
-            return
-        }
-        try {
-            moveToStartedState()
-            startForegroundAndShowNotification()
-            notificationManager?.notify(NOTIFICATION_ID, builder.setContentText("content").build())
-//            continueTimer(startTime)
-        } finally {
-            isServiceStarted = true
-        }
-    }
-
-//    private fun continueTimer(startTime: Long) {
-//        job = GlobalScope.launch(Dispatchers.Main) {
-//            while (true) {
-//                notificationManager?.notify(
-//                    NOTIFICATION_ID,
-//                    getNotification(
-//                        (System.currentTimeMillis() - startTime).displayTime().dropLast(3)
-//                    )
-//                )
-//                delay(INTERVAL)
-//            }
-//        }
-//    }
 
     private fun moveToStartedState() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -131,12 +160,15 @@ class TimerForegroundService : Service() {
         private const val CHANNEL_ID = "TimerForegroundService"
         private const val CHANNEL_NAME = "Game Timer Channel"
 
-        const val TIMER_DATA_KEY = "TIMER_DATA_KEY"
-
         const val INVALID = "INVALID"
         const val COMMAND_START = "COMMAND_START"
         const val COMMAND_STOP = "COMMAND_STOP"
         const val COMMAND_ID = "COMMAND_ID"
-        const val STARTED_TIMER_TIME_MS = "STARTED_TIMER_TIME_MS"
+
+        const val TIMER_FROM_SERVICE_VALUE = "TIMER_FROM_SERVICE_VALUE"
+        const val TIMER_FROM_SERVICE_ID = "TIMER_FROM_SERVICE_ID"
+        const val TIMER_FROM_ACTIVITY_VALUE = "TIMER_FROM_ACTIVITY_VALUE"
+        const val TIMER_FROM_ACTIVITY_ID = "TIMER_FROM_ACTIVITY_ID"
+        const val TIMER_FROM_ACTIVITY_NAME = "TIMER_FROM_ACTIVITY_NAME"
     }
 }

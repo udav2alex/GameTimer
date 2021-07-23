@@ -17,12 +17,12 @@ class MainVModel(
     val updateListStatusFlow: StateFlow<Long> = interactor.updateListStatusFlow
 
     fun newTimer(time: String) {
-        val df = SimpleDateFormat("yyyy-MM-DD HH:mm:ss", Locale.getDefault())
+        val df = SimpleDateFormat("MMM-DD HH:mm:ss", Locale.getDefault())
         interactor.storeTimer(
             ActiveTimer(
                 UUID.randomUUID(),
-                df.format(Date()),
-                Ticker(time.toInt() * 60)
+                "Timer ${df.format(Date())}",
+                Ticker(time.toLong() * 60)
             )
         )
     }
