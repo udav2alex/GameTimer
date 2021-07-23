@@ -8,12 +8,12 @@ import java.util.*
 class MainInteractor(
     private val timersRepository: ITimersRepository
 ) {
-    private val _updateListStatusFlow = MutableStateFlow(0L)
-    val updateListStatusFlow: StateFlow<Long> = _updateListStatusFlow.asStateFlow()
+    private var pusher: Long = 0L
+    private val _updateListStatusFlow = MutableStateFlow(pusher to listOf<ActiveTimer>())
+    val updateListStatusFlow: StateFlow<Pair<Long, List<ActiveTimer>>> =
+        _updateListStatusFlow.asStateFlow()
 
     private val _timersList = mutableListOf<ActiveTimer>()
-    val timersList: List<ActiveTimer> = _timersList
-
 
     fun storeTimer(timer: ActiveTimer) {
         _timersList.indexOf(timer).let {
@@ -21,7 +21,7 @@ class MainInteractor(
                 _timersList.add(timer)
             }
         }
-        _updateListStatusFlow.value = System.currentTimeMillis()
+        _updateListStatusFlow.value = ++pusher to _timersList
     }
 
     fun toggleTimerById(id: UUID) {
@@ -45,7 +45,7 @@ class MainInteractor(
             it.id == id
         }?.let {
             _timersList.remove(it)
-            _updateListStatusFlow.value = System.currentTimeMillis()
+            _updateListStatusFlow.value = ++pusher to _timersList
         }
     }
 
@@ -53,6 +53,6 @@ class MainInteractor(
     private fun updateTimersList() {
         _timersList.clear()
         _timersList.addAll(timersRepository.getAllTimers())
-        _updateListStatusFlow.value = System.currentTimeMillis()
+        _updateListStatusFlow.value = ++pusher to _timersList
     }
 }

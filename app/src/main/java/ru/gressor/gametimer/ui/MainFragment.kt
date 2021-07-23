@@ -21,8 +21,17 @@ class MainFragment : BaseFragment<FragmentMainBinding>(), MainRecyclerAdapter.Co
             this, MainVModelFactory(MainInteractor(TimersRepositoryList()))
         ).get()
     }
-
+    private lateinit var listener: ActiveTimerListener
     private lateinit var adapter: MainRecyclerAdapter
+
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
+    ): View {
+        if (context is ActiveTimerListener) {
+            listener = context as ActiveTimerListener
+        }
+        return super.onCreateView(inflater, container, savedInstanceState)
+    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         adapter = MainRecyclerAdapter(this)
@@ -34,8 +43,9 @@ class MainFragment : BaseFragment<FragmentMainBinding>(), MainRecyclerAdapter.Co
             lifecycleScope.launch {
                 vModel.updateListStatusFlow
                     .flowWithLifecycle(lifecycle, Lifecycle.State.STARTED)
-                    .collect {
-                        adapter.populate(vModel.timersList)
+                    .collect { (_, list) ->
+                        adapter.populate(list)
+                        listener.setActiveTimer(findActiveTimer(list))
                     }
             }
 
@@ -55,4 +65,10 @@ class MainFragment : BaseFragment<FragmentMainBinding>(), MainRecyclerAdapter.Co
 
     override fun getBinding(inflater: LayoutInflater, container: ViewGroup?) =
         FragmentMainBinding.inflate(inflater, container, false)
+
+    private fun findActiveTimer(list: List<ActiveTimer>) = list.find { it.ticker.isRunning }
+
+    interface ActiveTimerListener {
+        fun setActiveTimer(timer: ActiveTimer?)
+    }
 }

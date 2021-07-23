@@ -13,9 +13,9 @@ import ru.gressor.gametimer.interactor.ActiveTimer
 import ru.gressor.gametimer.ui.MainFragment
 import java.util.*
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), MainFragment.ActiveTimerListener {
     private lateinit var binding: ActivityMainBinding
-    private var activeTimer: ActiveTimer? = null
+    private var timer: ActiveTimer? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -31,7 +31,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onStop() {
-        activeTimer?.let {
+        timer?.let {
             val startIntent = Intent(this, TimerForegroundService::class.java)
             startIntent.putExtra(COMMAND_ID, COMMAND_START)
             startIntent.putExtra(TIMER_FROM_ACTIVITY_VALUE, it.ticker.flow.value)
@@ -41,5 +41,9 @@ class MainActivity : AppCompatActivity() {
         }
 
         super.onStop()
+    }
+
+    override fun setActiveTimer(timer: ActiveTimer?) {
+        this.timer = timer
     }
 }

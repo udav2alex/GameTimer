@@ -12,9 +12,7 @@ class MainVModel(
     private val interactor: MainInteractor
 ) : ViewModel() {
 
-    val timersList = interactor.timersList
-
-    val updateListStatusFlow: StateFlow<Long> = interactor.updateListStatusFlow
+    val updateListStatusFlow = interactor.updateListStatusFlow
 
     fun newTimer(time: String) {
         val df = SimpleDateFormat("MMM-DD HH:mm:ss", Locale.getDefault())
