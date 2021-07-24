@@ -23,19 +23,17 @@ class Ticker(
         if (isRunning) start()
     }
 
-    val state: TickerState
-        get() = getUpdatedState()
+    var state: TickerState = getUpdatedState()
+        private set
 
     fun start() {
-        pushStateToFlow()
-
         if (finished) {
             resetValue()
-            pushStateToFlow()
         }
 
         running = true
         finished = false
+        pushStateToFlow()
 
         job = CoroutineScope(Dispatchers.IO).launch {
             while (!finished && currentValue > finishValue) {
@@ -75,5 +73,7 @@ class Ticker(
         finishValue,
         running,
         finished
-    )
+    ).also {
+        state = it
+    }
 }
