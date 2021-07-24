@@ -8,30 +8,29 @@ import java.util.*
 class MainInteractor(
     private val timersRepository: ITimersRepository
 ) {
-    private var pusher: Long = 0L
-    private val _updateListStatusFlow = MutableStateFlow(pusher to listOf<ActiveTimer>())
-    val updateListStatusFlow: StateFlow<Pair<Long, List<ActiveTimer>>> =
+    private val _updateListStatusFlow = MutableStateFlow(listOf<ActiveTimer>())
+    val updateListStatusFlow: StateFlow<List<ActiveTimer>> =
         _updateListStatusFlow.asStateFlow()
 
-    private val _timersList = mutableListOf<ActiveTimer>()
+    private val timersList = mutableListOf<ActiveTimer>()
 
     fun storeTimer(timer: ActiveTimer) {
-        _timersList.indexOf(timer).let {
+        timersList.indexOf(timer).let {
             if (it < 0) {
-                _timersList.add(timer)
+                timersList.add(timer)
             }
         }
-        _updateListStatusFlow.value = ++pusher to _timersList
+        _updateListStatusFlow.value = timersList.toList()
     }
 
     fun toggleTimerById(id: UUID) {
-        _timersList.find {
+        timersList.find {
             it.id == id
         }?.let {
             if (it.ticker.state.isRunning) {
                 it.ticker.stop()
             } else {
-                _timersList.forEach { timer ->
+                timersList.forEach { timer ->
                     if (timer.ticker.state.isRunning) timer.ticker.stop()
                 }
                 it.ticker.start()
@@ -41,18 +40,18 @@ class MainInteractor(
     }
 
     fun deleteTimerById(id: UUID) {
-        _timersList.find {
+        timersList.find {
             it.id == id
         }?.let {
-            _timersList.remove(it)
-            _updateListStatusFlow.value = ++pusher to _timersList
+            timersList.remove(it)
+            _updateListStatusFlow.value = timersList.toList()
         }
     }
 
     // TODO implement backup timers later
     private fun updateTimersList() {
-        _timersList.clear()
-        _timersList.addAll(timersRepository.getAllTimers())
-        _updateListStatusFlow.value = ++pusher to _timersList
+        timersList.clear()
+        timersList.addAll(timersRepository.getAllTimers())
+        _updateListStatusFlow.value = timersList.toList()
     }
 }

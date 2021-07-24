@@ -43,9 +43,9 @@ class MainFragment : BaseFragment<FragmentMainBinding>(), MainRecyclerAdapter.Co
             lifecycleScope.launch {
                 vModel.updateListStatusFlow
                     .flowWithLifecycle(lifecycle, Lifecycle.State.STARTED)
-                    .collect { (_, list) ->
+                    .collect { list ->
                         adapter.submitList(list)
-                        listener.setActiveTimer(findActiveTimer(list))
+                        listener.updateTimersList(list)
                     }
             }
 
@@ -66,9 +66,7 @@ class MainFragment : BaseFragment<FragmentMainBinding>(), MainRecyclerAdapter.Co
     override fun getBinding(inflater: LayoutInflater, container: ViewGroup?) =
         FragmentMainBinding.inflate(inflater, container, false)
 
-    private fun findActiveTimer(list: List<ActiveTimer>) = list.find { it.ticker.state.isRunning }
-
     interface ActiveTimerListener {
-        fun setActiveTimer(timer: ActiveTimer?)
+        fun updateTimersList(list: List<ActiveTimer>)
     }
 }
