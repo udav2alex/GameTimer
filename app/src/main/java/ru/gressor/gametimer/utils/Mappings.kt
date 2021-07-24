@@ -3,31 +3,32 @@ package ru.gressor.gametimer.utils
 import ru.gressor.gametimer.domain.ActiveTimer
 import ru.gressor.gametimer.domain.Ticker
 import ru.gressor.gametimer.repository.StoredTimer
-import java.text.DecimalFormat
 import java.util.*
-
-object DF : DecimalFormat("00")
 
 fun String.toUUID(): UUID = UUID.fromString(this)
 
 fun ActiveTimer.toStored() =
     StoredTimer(id, name, ticker.flow.value.currentValue, ticker.startValue, ticker.state.isRunning)
 
-fun StoredTimer.toActive() = ActiveTimer(id, name, Ticker(time, 0, running))
+fun StoredTimer.toActive() = ActiveTimer(id, name, Ticker(time, 0))
 
 fun Long.secondsToString() = StringBuilder().also {
-    var seconds = (this)
-    val days = seconds / 3600 / 24
+    val days = this / 1000 / 3600 / 24
     if (days > 0) it.append("$days:")
 
-    seconds -= days * 3600 * 24
-    val hours = seconds / 3600
-    it.append("${DF.format(hours)}:")
+    val hours = this / 1000 / 3600 % 24
+    it.addTwoDigits(hours).append(":")
 
-    seconds -= hours * 3600
-    val minutes = seconds / 60
-    it.append("${DF.format(minutes)}:")
+    val minutes = this / 1000 / 60 % 60
+    it.addTwoDigits(minutes).append(":")
 
-    seconds -= minutes * 60
-    it.append(DF.format(seconds))
+    val seconds = this / 1000 % 60
+    it.addTwoDigits(seconds)
 }.toString()
+
+fun StringBuilder.addTwoDigits(value: Long): StringBuilder = this.apply {
+    if (value < 10L) {
+        append("0")
+    }
+    append(value)
+}

@@ -6,8 +6,8 @@
         android:propertyName="fillAlpha"
         android:repeatCount="infinite"
         android:repeatMode="reverse"
-        android:valueFrom="1"
-        android:valueTo="0"
+        android:valueFrom="0"
+        android:valueTo="1"
         android:valueType="floatType" />
 
     <objectAnimator
@@ -15,8 +15,8 @@
         android:propertyName="fillAlpha"
         android:repeatCount="infinite"
         android:repeatMode="reverse"
-        android:valueFrom="0"
-        android:valueTo="1"
+        android:valueFrom="1"
+        android:valueTo="0"
         android:valueType="floatType" />
 
 </set>

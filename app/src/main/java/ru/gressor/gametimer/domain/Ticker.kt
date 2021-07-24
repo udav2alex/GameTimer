@@ -8,8 +8,7 @@ import kotlinx.coroutines.flow.asStateFlow
 class Ticker(
     val startValue: Long,
     private val finishValue: Long = 0L,
-    isRunning: Boolean = false,
-    private val pauseMillis: Long = 1000L
+    isRunning: Boolean = false
 ) {
     private var job: Job? = null
     private var finished = false
@@ -36,11 +35,16 @@ class Ticker(
         pushStateToFlow()
 
         job = CoroutineScope(Dispatchers.IO).launch {
+            var before = System.currentTimeMillis()
             while (!finished && currentValue > finishValue) {
-                delay(pauseMillis)
-                currentValue--
+                delay(PAUSE_MILLIS)
+                val after = System.currentTimeMillis()
 
-                if (currentValue == 0L) {
+                currentValue -= after - before
+                before = after
+
+                if (currentValue <= 0L) {
+                    currentValue = 0L
                     finished = true
                     running = false
                 }
@@ -75,5 +79,9 @@ class Ticker(
         finished
     ).also {
         state = it
+    }
+
+    private companion object {
+        const val PAUSE_MILLIS = 50L
     }
 }

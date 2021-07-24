@@ -19,7 +19,7 @@ class MainVModel(
             ActiveTimer(
                 UUID.randomUUID(),
                 "Timer ${df.format(Date())}",
-                Ticker(time.toLong() * 60)
+                Ticker(time.toLong() * 60_000)
             )
         )
     }
