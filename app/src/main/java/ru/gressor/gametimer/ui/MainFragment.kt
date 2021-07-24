@@ -50,7 +50,12 @@ class MainFragment : BaseFragment<FragmentMainBinding>(), MainRecyclerAdapter.Co
             }
 
             addTimerButton.setOnClickListener {
-                vModel.newTimer(timeEditText.text.toString())
+                val number = timeEditText.text.toString().toInt()
+                if (number > 0) {
+                    vModel.newTimer(timeEditText.text.toString())
+                } else {
+                    listener.renderError("Значение должно быть строго больше 0!")
+                }
             }
         }
     }
@@ -68,5 +73,6 @@ class MainFragment : BaseFragment<FragmentMainBinding>(), MainRecyclerAdapter.Co
 
     interface ActiveTimerListener {
         fun updateTimersList(list: List<ActiveTimer>)
+        fun renderError(message: String)
     }
 }

@@ -2,6 +2,7 @@ package ru.gressor.gametimer
 
 import android.content.Intent
 import android.os.Bundle
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import ru.gressor.gametimer.TimerForegroundService.Companion.COMMAND_ID
 import ru.gressor.gametimer.TimerForegroundService.Companion.COMMAND_START
@@ -58,6 +59,10 @@ class MainActivity : AppCompatActivity(), MainFragment.ActiveTimerListener {
 
     override fun updateTimersList(list: List<ActiveTimer>) {
         this.timersList = list
+    }
+
+    override fun renderError(message: String) {
+        Toast.makeText(this, message, Toast.LENGTH_LONG).show()
     }
 
     private fun findRunningTimer() = timersList?.find { it.ticker.state.isRunning }
