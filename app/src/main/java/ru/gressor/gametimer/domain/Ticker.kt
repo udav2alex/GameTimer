@@ -8,7 +8,8 @@ import kotlinx.coroutines.flow.asStateFlow
 class Ticker(
     val startValue: Long,
     private val finishValue: Long = 0L,
-    isRunning: Boolean = false
+    isRunning: Boolean = false,
+    startedAtMillis: Long = 0
 ) {
     private var job: Job? = null
     private var finished = false
@@ -19,7 +20,12 @@ class Ticker(
     val flow: StateFlow<TickerState> = _flow.asStateFlow()
 
     init {
-        if (isRunning) start()
+        if (isRunning) {
+            val before =
+                if (startedAtMillis != 0L) System.currentTimeMillis() - startedAtMillis else 0
+            currentValue = startValue - before
+            start()
+        }
     }
 
     var state: TickerState = getUpdatedState()

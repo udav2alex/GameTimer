@@ -24,20 +24,20 @@ class TimerForegroundService : Service() {
     private var isServiceStarted = false
     private var notificationManager: NotificationManager? = null
 
-    private val builder
-        get() =
-            NotificationCompat.Builder(this, CHANNEL_ID)
-                .setDefaults(NotificationCompat.DEFAULT_ALL)
-                .setPriority(NotificationCompat.PRIORITY_HIGH)
-                .setSmallIcon(R.drawable.hourglass)
-                .setContentTitle(timer?.name ?: "Game Timer")
-                .setGroup("Timer")
-                .setGroupSummary(false)
-                .setContentIntent(getPendingIntent())
-                .setAutoCancel(false)
-                .setSilent(true)
+    private val builder by lazy {
+        NotificationCompat.Builder(this, CHANNEL_ID)
+            .setDefaults(NotificationCompat.DEFAULT_ALL)
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setSmallIcon(R.drawable.hourglass)
+            .setContentTitle("Game Timer")
+            .setGroup("Timer")
+            .setGroupSummary(false)
+            .setContentIntent(getPendingIntent())
+            .setAutoCancel(false)
+            .setSilent(true)
+    }
 
-    private fun getPendingIntent(): PendingIntent? {
+    private fun getPendingIntent(): PendingIntent {
         val resultIntent = Intent(this, MainActivity::class.java)
         resultIntent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
         return PendingIntent
@@ -67,15 +67,19 @@ class TimerForegroundService : Service() {
             COMMAND_STOP -> commandStop()
             COMMAND_START -> {
                 val startTime = intent?.extras?.getLong(TIMER_FROM_ACTIVITY_VALUE) ?: return
+                val startedAtMillis =
+                    intent.extras?.getLong(TIMER_FROM_ACTIVITY_STARTED_AT_MILLIS) ?: return
                 val id = intent.extras?.getString(TIMER_FROM_ACTIVITY_ID)?.toUUID() ?: return
                 val name = intent.extras?.getString(TIMER_FROM_ACTIVITY_NAME) ?: "Current timer"
-                commandStart(id, name, startTime)
+
+                builder.setContentTitle(name)
+                commandStart(id, name, startTime, startedAtMillis)
             }
         }
     }
 
     @DelicateCoroutinesApi
-    private fun commandStart(id: UUID, name: String, startTime: Long) {
+    private fun commandStart(id: UUID, name: String, startTime: Long, startedAtMillis: Long) {
         if (isServiceStarted) {
             return
         }
@@ -83,16 +87,34 @@ class TimerForegroundService : Service() {
             moveToStartedState()
             startForegroundAndShowNotification()
 
-            if (timer == null) timer = ActiveTimer(id, name, Ticker(startTime))
-            timer?.ticker?.let {
-                it.start()
+            if (timer == null) {
+                timer = ActiveTimer(
+                    id,
+                    name,
+                    Ticker(startTime, 0L, true, startedAtMillis)
+                )
+            }
+            timer?.let { handleTimer(it) }
 
-                try {
-                    job = GlobalScope.launch(Dispatchers.Main) {
-                        it.flow.collectLatest { state ->
+        } finally {
+            isServiceStarted = true
+        }
+    }
+
+    @DelicateCoroutinesApi
+    private fun handleTimer(thisTimer: ActiveTimer) {
+        thisTimer.ticker.let {
+            try {
+                var secondsNow = 0L
+                job = GlobalScope.launch(Dispatchers.Main) {
+                    it.flow.collectLatest { state ->
+                        if (secondsNow != state.currentValue / 1000) {
+                            secondsNow = state.currentValue / 1000
+
                             notificationManager?.notify(
                                 NOTIFICATION_ID,
-                                builder.setContentText(state.currentValue.secondsToString()).build()
+                                builder.setContentText(state.currentValue.secondsToString())
+                                    .build()
                             )
 
                             if (state.currentValue <= 0L) {
@@ -100,12 +122,10 @@ class TimerForegroundService : Service() {
                             }
                         }
                     }
-                } catch (e: Throwable) {
-                    // cancel cause exception
                 }
+            } catch (e: Throwable) {
+                // cancel cause exception
             }
-        } finally {
-            isServiceStarted = true
         }
     }
 
@@ -159,6 +179,7 @@ class TimerForegroundService : Service() {
         const val COMMAND_ID = "COMMAND_ID"
 
         const val TIMER_FROM_ACTIVITY_VALUE = "TIMER_FROM_ACTIVITY_VALUE"
+        const val TIMER_FROM_ACTIVITY_STARTED_AT_MILLIS = "TIMER_FROM_ACTIVITY_STARTED_AT_MILLIS"
         const val TIMER_FROM_ACTIVITY_ID = "TIMER_FROM_ACTIVITY_ID"
         const val TIMER_FROM_ACTIVITY_NAME = "TIMER_FROM_ACTIVITY_NAME"
     }

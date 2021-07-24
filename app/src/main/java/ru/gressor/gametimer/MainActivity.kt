@@ -8,6 +8,7 @@ import ru.gressor.gametimer.TimerForegroundService.Companion.COMMAND_START
 import ru.gressor.gametimer.TimerForegroundService.Companion.COMMAND_STOP
 import ru.gressor.gametimer.TimerForegroundService.Companion.TIMER_FROM_ACTIVITY_ID
 import ru.gressor.gametimer.TimerForegroundService.Companion.TIMER_FROM_ACTIVITY_NAME
+import ru.gressor.gametimer.TimerForegroundService.Companion.TIMER_FROM_ACTIVITY_STARTED_AT_MILLIS
 import ru.gressor.gametimer.TimerForegroundService.Companion.TIMER_FROM_ACTIVITY_VALUE
 import ru.gressor.gametimer.databinding.ActivityMainBinding
 import ru.gressor.gametimer.domain.ActiveTimer
@@ -44,6 +45,8 @@ class MainActivity : AppCompatActivity(), MainFragment.ActiveTimerListener {
                 val startIntent = Intent(this, TimerForegroundService::class.java)
                 startIntent.putExtra(COMMAND_ID, COMMAND_START)
                 startIntent.putExtra(TIMER_FROM_ACTIVITY_VALUE, it.ticker.flow.value.currentValue)
+                startIntent
+                    .putExtra(TIMER_FROM_ACTIVITY_STARTED_AT_MILLIS, System.currentTimeMillis())
                 startIntent.putExtra(TIMER_FROM_ACTIVITY_ID, it.id.toString())
                 startIntent.putExtra(TIMER_FROM_ACTIVITY_NAME, it.name)
                 startService(startIntent)
